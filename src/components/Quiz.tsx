@@ -132,9 +132,6 @@ export default function Quiz() {
   const totalQuestions = questions.length;
   const answeredCount = correctCount + wrongCount;
   
-  // The current question number (e.g. 1st, 2nd, etc.)
-  const currentQuestionNumber = Math.min(totalQuestions, selectedAnswer !== null ? answeredCount : answeredCount + 1);
-  
   const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
   const progressPercent = (answeredCount / totalQuestions) * 100;
 
