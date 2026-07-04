@@ -231,7 +231,7 @@ export default function Quiz() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
           <div className="flex items-center justify-between md:justify-start gap-4">
             <span className="text-sm font-semibold text-slate-300">
-              Progress: <span className="text-indigo-400 font-bold">{currentQuestionNumber}</span> / <span className="text-slate-400">{totalQuestions}</span>
+              Progress: <span className="text-indigo-400 font-bold">{answeredCount}</span> / <span className="text-slate-400">{totalQuestions}</span>
             </span>
             <span className="text-xs text-slate-500 font-medium px-2 py-0.5 bg-slate-800/80 rounded-md border border-slate-700/30">
               Remaining: {remainingIds.length + (selectedAnswer === null ? 1 : 0)}
