@@ -123,7 +123,7 @@ export default function Quiz() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
-        <p className="font-medium text-slate-300">Ładowanie pytań...</p>
+        <p className="font-medium text-slate-300">Loading questions...</p>
       </div>
     );
   }
@@ -152,23 +152,23 @@ export default function Quiz() {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-amber-200 via-yellow-300 to-orange-200 bg-clip-text text-transparent mb-4">
-            Gratulacje!
+            Congratulations!
           </h2>
           <p className="text-slate-300 text-lg mb-8 max-w-md mx-auto">
-            Udało Ci się odpowiedzieć na wszystkie <strong>{totalQuestions}</strong> pytań z bazy! Twój wynik końcowy:
+            You successfully answered all <strong>{totalQuestions}</strong> questions! Your final score:
           </p>
 
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-10">
             <div className="bg-slate-800/50 border border-slate-700/30 p-4 rounded-2xl">
-              <span className="block text-sm text-slate-400 font-medium mb-1">Poprawne</span>
+              <span className="block text-sm text-slate-400 font-medium mb-1">Correct</span>
               <span className="text-2xl font-bold text-emerald-400">{correctCount}</span>
             </div>
             <div className="bg-slate-800/50 border border-slate-700/30 p-4 rounded-2xl">
-              <span className="block text-sm text-slate-400 font-medium mb-1">Błędne</span>
+              <span className="block text-sm text-slate-400 font-medium mb-1">Incorrect</span>
               <span className="text-2xl font-bold text-rose-400">{wrongCount}</span>
             </div>
             <div className="bg-slate-800/50 border border-slate-700/30 p-4 rounded-2xl">
-              <span className="block text-sm text-slate-400 font-medium mb-1">Skuteczność</span>
+              <span className="block text-sm text-slate-400 font-medium mb-1">Accuracy</span>
               <span className="text-2xl font-bold text-indigo-400">{accuracy}%</span>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function Quiz() {
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border-0"
           >
             <RotateCcw className="w-5 h-5" />
-            Rozpocznij nową sesję
+            Start New Session
           </button>
         </div>
       </div>
@@ -199,28 +199,28 @@ export default function Quiz() {
         <div className="relative">
           {showResetConfirm ? (
             <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 p-1.5 rounded-xl shadow-lg absolute right-0 top-0 z-50 whitespace-nowrap">
-              <span className="text-xs text-slate-300 px-2">Na pewno reset?</span>
+              <span className="text-xs text-slate-300 px-2">Confirm reset?</span>
               <button 
                 onClick={startNewSession}
                 className="text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg cursor-pointer border-0"
               >
-                Tak
+                Yes
               </button>
               <button 
                 onClick={() => setShowResetConfirm(false)}
                 className="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg cursor-pointer border-0"
               >
-                Nie
+                No
               </button>
             </div>
           ) : (
             <button
               onClick={() => setShowResetConfirm(true)}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-transparent"
-              title="Zresetuj obecny postęp"
+              title="Reset current progress"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Resetuj sesję
+              Reset Session
             </button>
           )}
         </div>
@@ -231,25 +231,25 @@ export default function Quiz() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
           <div className="flex items-center justify-between md:justify-start gap-4">
             <span className="text-sm font-semibold text-slate-300">
-              Postęp: <span className="text-indigo-400 font-bold">{currentQuestionNumber}</span> / <span className="text-slate-400">{totalQuestions}</span>
+              Progress: <span className="text-indigo-400 font-bold">{currentQuestionNumber}</span> / <span className="text-slate-400">{totalQuestions}</span>
             </span>
             <span className="text-xs text-slate-500 font-medium px-2 py-0.5 bg-slate-800/80 rounded-md border border-slate-700/30">
-              Zostało: {remainingIds.length + (selectedAnswer === null ? 1 : 0)}
+              Remaining: {remainingIds.length + (selectedAnswer === null ? 1 : 0)}
             </span>
           </div>
 
           <div className="flex items-center justify-between md:justify-end gap-3 text-xs md:text-sm font-semibold">
             <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-xl">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Poprawne: <strong className="font-bold">{correctCount}</strong>
+              Correct: <strong className="font-bold">{correctCount}</strong>
             </div>
             <div className="flex items-center gap-1.5 text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-xl">
               <span className="w-2 h-2 rounded-full bg-rose-400"></span>
-              Błędne: <strong className="font-bold">{wrongCount}</strong>
+              Incorrect: <strong className="font-bold">{wrongCount}</strong>
             </div>
             <div className="flex items-center gap-1.5 text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-xl">
               <Percent className="w-3.5 h-3.5 text-indigo-400" />
-              Wynik: <strong className="font-bold">{accuracy}%</strong>
+              Accuracy: <strong className="font-bold">{accuracy}%</strong>
             </div>
           </div>
         </div>
@@ -280,7 +280,7 @@ export default function Quiz() {
             {/* Question ID tag */}
             <div className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/40 text-xs font-semibold text-slate-400 px-3 py-1 rounded-full mb-4">
               <AlertCircle className="w-3.5 h-3.5 text-indigo-400" />
-              Pytanie #{currentQuestion.id}
+              Question #{currentQuestion.id}
             </div>
 
             {/* Question Text */}
@@ -354,19 +354,19 @@ export default function Quiz() {
                     <h3 className={`text-sm md:text-base font-bold uppercase tracking-wider ${
                       selectedAnswer === currentQuestion.answer ? 'text-emerald-400' : 'text-slate-300'
                     }`}>
-                      {selectedAnswer === currentQuestion.answer ? 'Doskonale! Prawidłowa odpowiedź' : 'Niestety, to błędna odpowiedź'}
+                      {selectedAnswer === currentQuestion.answer ? 'Excellent! Correct answer' : 'Incorrect answer'}
                     </h3>
                   </div>
                   
                   {selectedAnswer !== currentQuestion.answer && (
                     <p className="text-slate-300 mb-4 text-sm md:text-base">
-                      Poprawna odpowiedź to <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
+                      Correct answer is <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
                     </p>
                   )}
 
                   {currentQuestion.explanation && (
                     <div className="border-t border-slate-800/80 pt-4">
-                      <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Wyjaśnienie:</h4>
+                      <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Explanation:</h4>
                       <p className="text-slate-300 text-sm md:text-base leading-relaxed font-normal">
                         {currentQuestion.explanation}
                       </p>
@@ -380,7 +380,7 @@ export default function Quiz() {
                     onClick={handleNext}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border-0"
                   >
-                    Następne pytanie
+                    Next Question
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
