@@ -168,7 +168,7 @@ export default function Quiz() {
               <span className="text-2xl font-bold text-rose-400">{wrongCount}</span>
             </div>
             <div className="bg-slate-800/50 border border-slate-700/30 p-4 rounded-2xl">
-              <span className="block text-sm text-slate-400 font-medium mb-1">Accuracy</span>
+              <span className="block text-sm text-slate-400 font-medium mb-1">Score</span>
               <span className="text-2xl font-bold text-indigo-400">{accuracy}%</span>
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function Quiz() {
             </div>
             <div className="flex items-center gap-1.5 text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-xl">
               <Percent className="w-3.5 h-3.5 text-indigo-400" />
-              Accuracy: <strong className="font-bold">{accuracy}%</strong>
+              Score: <strong className="font-bold">{accuracy}%</strong>
             </div>
           </div>
         </div>
