@@ -1109,7 +1109,7 @@
     "options": {
       "A": "In the CLAUDE.md file under a ## Subagents section",
       "B": "In .claude/agents/ with frontmatter fields for tools, disallowedTools, and permissionMode",
-      "C": "Both B and C are valid approaches for defining custom subagents",
+      "C": "Both B and D are valid approaches for defining custom subagents",
       "D": "In a JSON configuration file passed via --agents CLI flag"
     },
     "answer": "C",
