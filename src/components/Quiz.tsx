@@ -1,18 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircle2, 
-  XCircle, 
-  RotateCcw, 
-  Award, 
-  BookOpen, 
-  ChevronRight, 
-  AlertCircle, 
-  Percent, 
-  Check, 
-  X, 
-  Clock 
-} from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, Award, BookOpen, ChevronRight, AlertCircle, Percent, Check, X } from 'lucide-react';
 import questionsData from '../data/questions.json';
 
 interface Question {
@@ -29,7 +17,7 @@ interface Question {
 }
 
 // Fisher-Yates Shuffle
-const shuffleArray = <T,>(array: T[]): T[] => {
+const shuffleArray = (array: number[]): number[] => {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -42,13 +30,13 @@ export default function Quiz() {
   const [mounted, setMounted] = useState(false);
   const [questions] = useState<Question[]>(questionsData as Question[]);
   
-  // States
+  // Quiz State
   const [remainingIds, setRemainingIds] = useState<number[]>([]);
   const [currentId, setCurrentId] = useState<number | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(120); // 120 seconds per question
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -59,7 +47,6 @@ export default function Quiz() {
     const savedSelected = localStorage.getItem('fiszki_selected_answer');
     const savedCorrect = localStorage.getItem('fiszki_correct_count');
     const savedWrong = localStorage.getItem('fiszki_wrong_count');
-    const savedTimeLeft = localStorage.getItem('fiszki_time_left');
 
     if (savedRemaining && savedCurrent) {
       setRemainingIds(JSON.parse(savedRemaining));
@@ -67,13 +54,22 @@ export default function Quiz() {
       setSelectedAnswer(savedSelected ? JSON.parse(savedSelected) : null);
       setCorrectCount(Number(savedCorrect) || 0);
       setWrongCount(Number(savedWrong) || 0);
-      setTimeLeft(savedTimeLeft ? Number(savedTimeLeft) : 120);
     } else {
-      startNewSession();
+      // Initialize fresh session
+      const allIds = questionsData.map(q => q.id);
+      const shuffled = shuffleArray(allIds);
+      const firstId = shuffled.pop() || null;
+      
+      setRemainingIds(shuffled);
+      setCurrentId(firstId);
+      setSelectedAnswer(null);
+      setCorrectCount(0);
+      setWrongCount(0);
+      setShowResetConfirm(false);
     }
   }, []);
 
-  // Save states to localStorage on changes
+  // Save state to localStorage on changes
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem('fiszki_remaining', JSON.stringify(remainingIds));
@@ -81,30 +77,10 @@ export default function Quiz() {
     localStorage.setItem('fiszki_selected_answer', JSON.stringify(selectedAnswer));
     localStorage.setItem('fiszki_correct_count', String(correctCount));
     localStorage.setItem('fiszki_wrong_count', String(wrongCount));
-    localStorage.setItem('fiszki_time_left', String(timeLeft));
-  }, [remainingIds, currentId, selectedAnswer, correctCount, wrongCount, timeLeft, mounted]);
-
-  // Timer Effect
-  useEffect(() => {
-    if (!mounted || currentId === null || selectedAnswer !== null) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          // Timeout occurred: Increment wrong count and show "timeout" state
-          setWrongCount((w) => w + 1);
-          setSelectedAnswer("timeout");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [mounted, currentId, selectedAnswer, remainingIds]);
+  }, [remainingIds, currentId, selectedAnswer, correctCount, wrongCount, mounted]);
 
   const startNewSession = () => {
-    const allIds = questionsData.map(q => q.id);
+    const allIds = questions.map(q => q.id);
     const shuffled = shuffleArray(allIds);
     const firstId = shuffled.pop() || null;
     
@@ -113,7 +89,7 @@ export default function Quiz() {
     setSelectedAnswer(null);
     setCorrectCount(0);
     setWrongCount(0);
-    setTimeLeft(120);
+    setShowResetConfirm(false);
   };
 
   const handleAnswerSelect = (option: string) => {
@@ -134,20 +110,16 @@ export default function Quiz() {
   const handleNext = () => {
     if (selectedAnswer === null) return;
     
-    if (remainingIds.length === 0) {
-      setCurrentId(null);
-    } else {
-      const nextRemaining = [...remainingIds];
-      const nextId = nextRemaining.pop() || null;
-      
-      setRemainingIds(nextRemaining);
-      setCurrentId(nextId);
-      setSelectedAnswer(null);
-      setTimeLeft(120);
-    }
+    const nextRemaining = [...remainingIds];
+    const nextId = nextRemaining.pop() || null;
+    
+    setRemainingIds(nextRemaining);
+    setCurrentId(nextId);
+    setSelectedAnswer(null);
   };
 
   if (!mounted) {
+    // Render skeleton/loader to prevent hydration mismatch
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
@@ -159,15 +131,9 @@ export default function Quiz() {
   const currentQuestion = questions.find(q => q.id === currentId);
   const totalQuestions = questions.length;
   const answeredCount = correctCount + wrongCount;
+  
   const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
   const progressPercent = (answeredCount / totalQuestions) * 100;
-
-  // Format seconds into M:SS
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
 
   // Session Completed
   if (currentId === null && remainingIds.length === 0) {
@@ -186,7 +152,7 @@ export default function Quiz() {
             Congratulations!
           </h2>
           <p className="text-slate-300 text-lg mb-8 max-w-md mx-auto">
-            You successfully completed all <strong>{totalQuestions}</strong> questions! Your final score:
+            You successfully answered all <strong>{totalQuestions}</strong> questions! Your final score:
           </p>
 
           <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-10">
@@ -216,8 +182,6 @@ export default function Quiz() {
     );
   }
 
-  const timerWarning = timeLeft <= 15; // Warn when <= 15 seconds remain
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 md:py-10">
       {/* Top Controls & Navigation */}
@@ -230,14 +194,32 @@ export default function Quiz() {
         </div>
 
         <div className="relative">
-          <button
-            onClick={startNewSession}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-transparent"
-            title="Reset current progress"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset Session
-          </button>
+          {showResetConfirm ? (
+            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 p-1.5 rounded-xl shadow-lg absolute right-0 top-0 z-50 whitespace-nowrap">
+              <span className="text-xs text-slate-300 px-2">Confirm reset?</span>
+              <button 
+                onClick={startNewSession}
+                className="text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg cursor-pointer border-0"
+              >
+                Yes
+              </button>
+              <button 
+                onClick={() => setShowResetConfirm(false)}
+                className="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg cursor-pointer border-0"
+              >
+                No
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-transparent"
+              title="Reset current progress"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Reset Session
+            </button>
+          )}
         </div>
       </div>
 
@@ -292,35 +274,14 @@ export default function Quiz() {
             {/* Ambient Background Lights */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
             
-            {/* Header: ID and Timer */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/40 text-xs font-semibold text-slate-400 px-3 py-1 rounded-full">
-                <AlertCircle className="w-3.5 h-3.5 text-indigo-400" />
-                Question #{currentQuestion.id}
-              </div>
-
-              {/* Countdown Timer */}
-              <div 
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold border font-sans transition-all duration-300 ${
-                  selectedAnswer === "timeout"
-                    ? 'bg-rose-950/40 border-rose-500/50 text-rose-400 animate-pulse font-extrabold shadow-md shadow-rose-500/5'
-                    : selectedAnswer !== null
-                      ? 'bg-slate-800/40 border-slate-700/30 text-slate-400' // Paused state
-                      : timerWarning
-                        ? 'bg-rose-950/40 border-rose-500/50 text-rose-400 animate-pulse font-extrabold shadow-md shadow-rose-500/5'
-                        : 'bg-indigo-950/40 border-indigo-500/50 text-indigo-400'
-                }`}
-                title={selectedAnswer === "timeout" ? "Time expired" : selectedAnswer !== null ? "Timer paused" : "Time remaining"}
-              >
-                <Clock className={`w-4 h-4 ${selectedAnswer === null && !timerWarning ? 'animate-pulse' : ''}`} />
-                <span>
-                  {selectedAnswer === "timeout" ? 'Out of Time' : selectedAnswer !== null ? 'Paused' : formatTime(timeLeft)}
-                </span>
-              </div>
+            {/* Question ID tag */}
+            <div className="inline-flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/40 text-xs font-semibold text-slate-400 px-3 py-1 rounded-full mb-4">
+              <AlertCircle className="w-3.5 h-3.5 text-indigo-400" />
+              Question #{currentQuestion.id}
             </div>
 
             {/* Question Text */}
-            <h2 className="text-lg md:text-xl font-bold text-slate-100 leading-relaxed mb-6 font-sans">
+            <h2 className="text-lg md:text-xl font-bold text-slate-100 leading-relaxed mb-6">
               {currentQuestion.question}
             </h2>
 
@@ -359,7 +320,7 @@ export default function Quiz() {
                         isCorrect ? <Check className="w-4 h-4 stroke-[3]" /> : (isSelected ? <X className="w-4 h-4 stroke-[3]" /> : key)
                       ) : key}
                     </span>
-                    <span className="pt-0.5 leading-relaxed font-sans">{optionText}</span>
+                    <span className="pt-0.5 leading-relaxed">{optionText}</span>
                   </button>
                 );
               })}
@@ -384,34 +345,24 @@ export default function Quiz() {
                   <div className="flex items-center gap-2 mb-3">
                     {selectedAnswer === currentQuestion.answer ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    ) : selectedAnswer === "timeout" ? (
-                      <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                     ) : (
                       <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                     )}
                     <h3 className={`text-sm md:text-base font-bold uppercase tracking-wider ${
                       selectedAnswer === currentQuestion.answer ? 'text-emerald-400' : 'text-slate-300'
                     }`}>
-                      {selectedAnswer === currentQuestion.answer 
-                        ? 'Excellent! Correct answer' 
-                        : selectedAnswer === 'timeout'
-                          ? "Time's Up!"
-                          : 'Incorrect answer'}
+                      {selectedAnswer === currentQuestion.answer ? 'Excellent! Correct answer' : 'Incorrect answer'}
                     </h3>
                   </div>
                   
-                  {selectedAnswer === "timeout" ? (
-                    <p className="text-slate-350 mb-4 text-sm md:text-base font-normal">
-                      You did not select an answer in time. The correct answer is <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
-                    </p>
-                  ) : selectedAnswer !== currentQuestion.answer && (
+                  {selectedAnswer !== currentQuestion.answer && (
                     <p className="text-slate-300 mb-4 text-sm md:text-base">
                       Correct answer is <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
                     </p>
                   )}
 
                   {currentQuestion.explanation && (
-                    <div className="border-t border-slate-800/80 pt-4 font-sans">
+                    <div className="border-t border-slate-800/80 pt-4">
                       <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Explanation:</h4>
                       <p className="text-slate-300 text-sm md:text-base leading-relaxed font-normal">
                         {currentQuestion.explanation}
