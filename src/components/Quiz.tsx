@@ -91,18 +91,10 @@ export default function Quiz() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Timeout occurred: Count as wrong and skip to next question
+          // Timeout occurred: Increment wrong count and show "timeout" state
           setWrongCount((w) => w + 1);
-          
-          if (remainingIds.length === 0) {
-            setCurrentId(null);
-          } else {
-            const nextRemaining = [...remainingIds];
-            const nextId = nextRemaining.pop() || null;
-            setRemainingIds(nextRemaining);
-            setCurrentId(nextId);
-          }
-          return 120;
+          setSelectedAnswer("timeout");
+          return 0;
         }
         return prev - 1;
       });
@@ -310,17 +302,19 @@ export default function Quiz() {
               {/* Countdown Timer */}
               <div 
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold border font-sans transition-all duration-300 ${
-                  selectedAnswer !== null
-                    ? 'bg-slate-800/40 border-slate-700/30 text-slate-400' // Paused state
-                    : timerWarning
-                      ? 'bg-rose-950/40 border-rose-500/50 text-rose-400 animate-pulse font-extrabold shadow-md shadow-rose-500/5'
-                      : 'bg-indigo-950/40 border-indigo-500/50 text-indigo-400'
+                  selectedAnswer === "timeout"
+                    ? 'bg-rose-950/40 border-rose-500/50 text-rose-400 animate-pulse font-extrabold shadow-md shadow-rose-500/5'
+                    : selectedAnswer !== null
+                      ? 'bg-slate-800/40 border-slate-700/30 text-slate-400' // Paused state
+                      : timerWarning
+                        ? 'bg-rose-950/40 border-rose-500/50 text-rose-400 animate-pulse font-extrabold shadow-md shadow-rose-500/5'
+                        : 'bg-indigo-950/40 border-indigo-500/50 text-indigo-400'
                 }`}
-                title={selectedAnswer !== null ? "Timer paused" : "Time remaining"}
+                title={selectedAnswer === "timeout" ? "Time expired" : selectedAnswer !== null ? "Timer paused" : "Time remaining"}
               >
                 <Clock className={`w-4 h-4 ${selectedAnswer === null && !timerWarning ? 'animate-pulse' : ''}`} />
                 <span>
-                  {selectedAnswer !== null ? 'Paused' : formatTime(timeLeft)}
+                  {selectedAnswer === "timeout" ? 'Out of Time' : selectedAnswer !== null ? 'Paused' : formatTime(timeLeft)}
                 </span>
               </div>
             </div>
@@ -390,17 +384,27 @@ export default function Quiz() {
                   <div className="flex items-center gap-2 mb-3">
                     {selectedAnswer === currentQuestion.answer ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    ) : selectedAnswer === "timeout" ? (
+                      <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                     ) : (
                       <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
                     )}
                     <h3 className={`text-sm md:text-base font-bold uppercase tracking-wider ${
                       selectedAnswer === currentQuestion.answer ? 'text-emerald-400' : 'text-slate-300'
                     }`}>
-                      {selectedAnswer === currentQuestion.answer ? 'Excellent! Correct answer' : 'Incorrect answer'}
+                      {selectedAnswer === currentQuestion.answer 
+                        ? 'Excellent! Correct answer' 
+                        : selectedAnswer === 'timeout'
+                          ? "Time's Up!"
+                          : 'Incorrect answer'}
                     </h3>
                   </div>
                   
-                  {selectedAnswer !== currentQuestion.answer && (
+                  {selectedAnswer === "timeout" ? (
+                    <p className="text-slate-350 mb-4 text-sm md:text-base font-normal">
+                      You did not select an answer in time. The correct answer is <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
+                    </p>
+                  ) : selectedAnswer !== currentQuestion.answer && (
                     <p className="text-slate-300 mb-4 text-sm md:text-base">
                       Correct answer is <strong className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans">{currentQuestion.answer}</strong>.
                     </p>
