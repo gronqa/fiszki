@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -140,7 +140,7 @@ export default function Quiz() {
       setExamTimeLeft(remaining);
 
       if (remaining <= 0) {
-        handleExamSubmit(true);
+        handleExamSubmit();
       }
     };
 
@@ -222,7 +222,7 @@ export default function Quiz() {
     }));
   };
 
-  const handleExamSubmit = (isTimeout = false) => {
+  const handleExamSubmit = () => {
     setExamCompleted(true);
     setShowSubmitConfirm(false);
     localStorage.setItem('fiszki_exam_completed', 'true');
@@ -652,7 +652,7 @@ export default function Quiz() {
                 <div className="flex items-center gap-1 bg-slate-900 border border-slate-700 p-1 rounded-xl shadow-lg whitespace-nowrap animate-fade-in text-xs font-semibold">
                   <span className="text-slate-300 px-2">Submit now?</span>
                   <button 
-                    onClick={() => handleExamSubmit(false)}
+                    onClick={() => handleExamSubmit()}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg cursor-pointer border-0"
                   >
                     Yes
