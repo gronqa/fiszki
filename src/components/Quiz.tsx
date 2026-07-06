@@ -49,7 +49,6 @@ export default function Quiz() {
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120); // 120 seconds per question
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -123,7 +122,6 @@ export default function Quiz() {
     setCorrectCount(0);
     setWrongCount(0);
     setTimeLeft(120);
-    setShowResetConfirm(false);
   };
 
   const handleAnswerSelect = (option: string) => {
@@ -240,32 +238,14 @@ export default function Quiz() {
         </div>
 
         <div className="relative">
-          {showResetConfirm ? (
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 p-1.5 rounded-xl shadow-lg absolute right-0 top-0 z-50 whitespace-nowrap">
-              <span className="text-xs text-slate-300 px-2">Confirm reset?</span>
-              <button 
-                onClick={startNewSession}
-                className="text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg cursor-pointer border-0"
-              >
-                Yes
-              </button>
-              <button 
-                onClick={() => setShowResetConfirm(false)}
-                className="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg cursor-pointer border-0"
-              >
-                No
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-transparent"
-              title="Reset current progress"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Session
-            </button>
-          )}
+          <button
+            onClick={startNewSession}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-transparent"
+            title="Reset current progress"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset Session
+          </button>
         </div>
       </div>
 
